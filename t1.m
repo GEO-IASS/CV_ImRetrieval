@@ -14,8 +14,9 @@ labs = labs + 1;
 labs = double(labs);
 
 dim = [32 32];
+level =12;
 
-ims = zeros(50000, numel(dim));
+ims = zeros(50000, prod(dim));
 
 % read images
 ind = 1;
@@ -34,6 +35,7 @@ clear ind temp i j
 
 % extract all sift descriptors
 descs = zeros(30*size(ims, 1), 128);
+descs_addi = zeros(30*size(ims, 1), 2);
 descs_labs = zeros(30*size(ims, 1), 1);
 
 ind = 1;
@@ -41,17 +43,29 @@ for i = 1:size(ims, 1)
     if mod(i, 1000) == 0
         disp(['   Extracting SIFT descriptors of ', num2str(i), ' images...']);
     end
+    level = 12;
     temp = ims(i, :);
     temp = reshape(temp, dim);
-    [~, temp_d] = vl_sift(single(temp), 'Levels', 12);
+    [~, temp_d] = vl_sift(single(temp), 'Levels', level);
+    while isempty(temp_d)
+        level = level + 1;
+        [~, temp_d] = vl_sift(single(temp), 'Levels', level);
+    end
     descs(ind : ind + size(temp_d', 1) - 1, :) = temp_d';
+    descs_addi(ind : ind + size(temp_d', 1) - 1, :) = repmat([level, size(temp_d', 1)], size(temp_d', 1), 1);
     descs_labs(ind : ind + size(temp_d', 1) - 1, :) = ones(size(temp_d', 1), 1)*labs(i);
     ind = ind + size(temp_d', 1);
 end
 
 descs(all(descs == 0, 2),:) = [];
+descs_addi(all(descs_addi == 0, 2),:) = [];
+descs_labs(all(descs_labs == 0, 2),:) = [];
 
-[codebook, ~] = vkmeans(descs', 500);
+%%%%%%% Do we need this normalization step????
+% I guess no.
+% descs = bsxfun(@rdivide, bsxfun(@minus, descs, mean(descs,2)), sqrt(var(descs,[],2)+10));
+
+[codebook, ~] = vkmeans(descs', 500, 10);
 
 % get train data
 trainD = zeros(size(ims, 1), size(codebook, 2));
@@ -63,7 +77,7 @@ for i = 1:size(ims, 1)
 end
 
 trainD_mean = mean(trainD, 1);
-trainD_sd = sqrt(var(trainD, 1)+0.01);
+trainD_sd = sqrt(var(trainD, 1) + 0.01);
 trainDs = bsxfun(@rdivide, bsxfun(@minus, trainD, trainD_mean), trainD_sd);
 
 % Use LIBLINEAR

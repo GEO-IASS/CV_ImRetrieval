@@ -3,7 +3,7 @@ function theta = train_svm(trainXC, trainY, C)
   numClasses = max(trainY);
   %w0 = zeros(size(trainXC,2)*(numClasses-1), 1);
   w0 = zeros(size(trainXC,2)*numClasses, 1);
-  w = minFunc(@my_l2svmloss, w0, struct('MaxIter', 1000, 'MaxFunEvals', 1000), ...
+  w = minFunc(@my_l2svmloss, w0, struct('MaxIter', 3000, 'MaxFunEvals', 3000), ...
               trainXC, trainY, numClasses, C);
 
   theta = reshape(w, size(trainXC,2), numClasses);

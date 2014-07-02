@@ -1,4 +1,4 @@
-function [clusters, assign] = vkmeans(X, K)
+function [clusters, assign] = vkmeans(X, K, Iteration)
 %KMEANS Memory-efficient implementation of k-means clustering
 %
 %   [clusters, assign] = kmeans(X, K)
@@ -7,7 +7,12 @@ function [clusters, assign] = vkmeans(X, K)
 
     % Initialize some variables
     tol = 1e-5;
-    max_iter = 10;
+    
+    if nargin < 3
+        max_iter = 100;
+    else
+        max_iter = Iteration;
+    end
     %batch_size = 2 ^ 13;
     N = size(X, 2);
     assign = zeros(1, N);
@@ -83,7 +88,8 @@ function [clusters, assign] = vkmeans(X, K)
         
         % Print out progress
         iter = iter + 1;
-        change = nanmean(nanmean(clusters - old_clusters));
+        %change = nanmean(nanmean(clusters - old_clusters));
+        change = mean2(abs(clusters) - abs(old_clusters));
         disp(['   * iteration ' num2str(iter) ': ' num2str(change .* 100) '% of the assignments changed']);
     end
     

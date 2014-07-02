@@ -1,7 +1,11 @@
-function centroids = run_kmeans(X, k, iterations)
+function centroids = run_kmeans(X, k, iterations, originC)
 
   x2 = sum(X.^2,2);
-  centroids = randn(k,size(X,2))*0.1;%X(randsample(size(X,1), k), :);
+  if nargin < 4
+    centroids = randn(k,size(X,2))*0.1;%X(randsample(size(X,1), k), :);
+  else
+    centroids = originC;
+  end
   BATCH_SIZE=1000;
   
   

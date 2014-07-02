@@ -12,7 +12,7 @@ function [feat] = getfeat5(im, D)
     %size(descs)
     
     descs = double(descs);
-    descs = bsxfun(@rdivide, bsxfun(@minus, descs, mean(descs, 1)), sqrt(var(descs, [], 1)+10));
+    %descs = bsxfun(@rdivide, bsxfun(@minus, descs, mean(descs, 1)), sqrt(var(descs, [], 1)+10));
     
     xx = sum(descs.^2, 1);
     yy = sum(D.^2, 1);
